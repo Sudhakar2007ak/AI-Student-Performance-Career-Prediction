@@ -18,7 +18,6 @@ def load_environment() -> None:
 def get_mysql_config() -> dict:
     load_environment()
 
-    # Local .env / environment variables
     config = {
         "host": os.getenv("MYSQL_HOST") or "localhost",
         "port": int(os.getenv("MYSQL_PORT") or "3306"),
@@ -28,24 +27,25 @@ def get_mysql_config() -> dict:
         or "student_career_prediction",
     }
 
-    # Streamlit Community Cloud Secrets override local defaults
     try:
         import streamlit as st
 
         secrets = st.secrets
-        config["host"] = secrets.get("MYSQL_HOST", config["host"])
-        config["port"] = int(
-            secrets.get("MYSQL_PORT", config["port"])
-        )
-        config["user"] = secrets.get("MYSQL_USER", config["user"])
-        config["password"] = secrets.get(
-            "MYSQL_PASSWORD", config["password"]
-        )
-        config["database"] = secrets.get(
-            "MYSQL_DATABASE", config["database"]
-        )
-    except Exception:
-        # When Streamlit Secrets are unavailable, use local config.
+
+        for key in ("MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD",
+                    "MYSQL_DATABASE"):
+            if key in secrets:
+                config_key = (
+                    "database" if key == "MYSQL_DATABASE"
+                    else key.removeprefix("MYSQL_").lower()
+                )
+                config[config_key] = secrets[key]
+
+        if "MYSQL_PORT" in secrets:
+            config["port"] = int(secrets["MYSQL_PORT"])
+
+    except FileNotFoundError:
+        # Streamlit Secrets are not configured in this environment.
         pass
 
     return config
