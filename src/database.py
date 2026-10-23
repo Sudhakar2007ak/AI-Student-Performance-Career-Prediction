@@ -29,11 +29,10 @@ def get_connection():
             password=password,
             database=config['database'],
         )
-    except Error as exc:
+        except Error as exc:
         error_code = getattr(exc, 'errno', None) or 'unknown'
         raise DatabaseConnectionError(
-            f'MySQL connection failed (error {error_code}). Check MYSQL_HOST, MYSQL_PORT, '
-            'MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE in the project-root .env file.'
+            f'MySQL connection failed (error {error_code}): {exc}'
         ) from exc
 
 
