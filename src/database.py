@@ -38,8 +38,11 @@ def get_connection():
         )
     except Error as exc:
         error_code = getattr(exc, "errno", None) or "unknown"
+        # Do not include credentials in the displayed error.
         raise DatabaseConnectionError(
-            f"MySQL connection failed (error {error_code}): {exc}"
+            f"MySQL connection failed (error {error_code}, "
+            f"{type(exc).__name__}). Check the Aiven host, port, "
+            "credentials, database name, and SSL configuration."
         ) from exc
 
 
@@ -68,7 +71,9 @@ def fetch_student_records():
     except Error as exc:
         error_code = getattr(exc, "errno", None) or "unknown"
         raise DatabaseConnectionError(
-            f"MySQL query failed (error {error_code}): {exc}"
+            f"MySQL query failed (error {error_code}, "
+            f"{type(exc).__name__}). Check the database tables "
+            "and column names."
         ) from exc
 
     finally:
