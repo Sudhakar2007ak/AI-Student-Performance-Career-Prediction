@@ -11,12 +11,11 @@ def render_page() -> None:
     st.title('Admin Dashboard')
     records, source, database_message = load_student_records()
     if source == 'demo dataset':
-        if database_message and not database_message.startswith('The database is reachable'):
+               if database_message and not database_message.startswith('The database is reachable'):
             st.warning('MySQL is unavailable. The dashboard is currently using the project dataset.')
-            st.info(
-                'Copy .env.example to .env in the project root, then set '
-                'MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE. '
-            )
+            st.error(f'MySQL diagnostic: {database_message}')
+        else:
+            st.info(database_message or 'No MySQL records are available; showing the project dataset.')
         else:
             st.info(database_message or 'No MySQL records are available; showing the project dataset.')
     elif source == 'unavailable':
